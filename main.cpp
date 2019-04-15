@@ -1,6 +1,9 @@
-#include <iostream>
+#include "enron.h"
+
+using namespace std;
 
 int main() {
-    std::cout << "Hello, World!" << std::endl;
+    enron::get()->log();
     return 0;
 }
+
