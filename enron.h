@@ -16,6 +16,9 @@ public:
     void log();
 
     static enron* get();
+
+private:
+    bool add_words_from(string & input_path);
 };
 
 #endif //INTERNSHIP_ENRON_H
