@@ -12,12 +12,13 @@ private:
 
 public:
     enron();
-    map<string, int>* parse();
     void log();
 
     static enron* get();
 
 private:
+    void recursiveParse(string & path);
+    void parse();
     bool add_words_from(string & input_path);
 };
 
