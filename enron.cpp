@@ -103,19 +103,22 @@ void enron::extract_data_from(ifstream &input) {
     mails->push_back(words_to_int);
 }
 
-// Outputs data in files on disk - @TODO
+// Outputs data in files on disk
 void enron::log() {
+    ofstream words_stream(get_enron_path().append("/map.txt"), ofstream::out);
+    ofstream mails_stream(get_enron_path().append("/mails.txt"), ofstream::out);
 
-    cout << words->size() << " words in the dictionnary" << "\n";
-    cout << mails->size() << " mails have been numerized"<< "\n";
+    for(auto[key, value]: (*words)) {
+        words_stream << key << " " << value << "\n";
+    }
 
     for (vector<int> v : (*mails)) {
         static int id = 1;
-        cout << id++ << " : ";
+        mails_stream << id++ << " : ";
         for (int i : v) {
-            cout << i << " ";
+            mails_stream << i << " ";
         }
-        cout << "\n";
+        mails_stream << "\n";
     }
 }
 
