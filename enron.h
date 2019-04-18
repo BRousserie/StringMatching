@@ -1,5 +1,6 @@
 #include <map>
 #include <string>
+#include <vector>
 
 using namespace std;
 
@@ -7,19 +8,24 @@ using namespace std;
 #define INTERNSHIP_ENRON_H
 class enron {
 private:
-    map<string, int>* data;
+    map<string, int>* words;
+    vector<vector<int>>* mails;
     static enron* singleton;
 
 public:
     enron();
     void log();
 
+
     static enron* get();
 
 private:
-    void recursiveParse(string & path);
-    void parse();
-    bool add_words_from(string & input_path);
+    bool read_file_at(string & file_path);
+    void add_words_from(ifstream &input);
+
+    void recursiveParse(string &path);
+    //
+    // void parse();
 };
 
 #endif //INTERNSHIP_ENRON_H
