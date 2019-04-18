@@ -7,8 +7,20 @@
 #include <cstring>
 
 
-// My path to maildir - will try to make it relative later using readlink
-const char *const enron_path = "/home/baptiste/dev/internship/maildir";
+string get_enron_path() {
+    char buff[PATH_MAX];
+    ssize_t len = ::readlink("/proc/self/exe", buff, sizeof(buff)-1);
+    if (len != -1) {
+        buff[len] = '\0';
+        string path(buff);
+        string undesired_part("/StringMatching/bin/Debug/StringMatching");
+        path = path.substr(0, path.size() - undesired_part.size());
+        return path.append("/maildir");
+    } else {
+        cout << "Error with program path";
+    }
+}
+
 
 enron::enron() {
     words = new map<string, int>;
@@ -22,7 +34,7 @@ enron *enron::singleton;
 enron *enron::get() {
     if (!enron::singleton) {
         enron::singleton = new enron();
-        string path(enron_path);
+        string path(get_enron_path());
         enron::singleton->recursiveParse(path);
     }
     return enron::singleton;
@@ -67,7 +79,7 @@ bool enron::read_file_at(string & file_path) {
     ifstream input(file_path);
 
     if (input.is_open()) {
-        add_words_from(input);
+        extract_data_from(input);
 
         input.close();
         return true;
@@ -78,7 +90,7 @@ bool enron::read_file_at(string & file_path) {
 }
 
 // Adds to enron::words the words that haven't been added yet, and associates them with a number
-void enron::add_words_from(ifstream & input) {
+void enron::extract_data_from(ifstream &input) {
     vector<int> words_to_int;
     string word;
 
@@ -91,13 +103,8 @@ void enron::add_words_from(ifstream & input) {
     mails->push_back(words_to_int);
 }
 
-// Prints to the console each mapped word and its associated number
+// Outputs data in files on disk - @TODO
 void enron::log() {
-    /* Log all keys and their value
-     *
-     * for (auto&[key, value]: *words)
-     *   cout << key << " - " << value << "\n";
-     */
 
     cout << words->size() << " words in the dictionnary" << "\n";
     cout << mails->size() << " mails have been numerized"<< "\n";
@@ -127,13 +134,13 @@ void enron::parse() {
     struct dirent *rep_ent; //rep_ent contains the user e-mails
 
 
-    if ((enron_dir = opendir(enron_path)) == nullptr) {
-        cout << "Error(" << errno << ") opening enron folder through " << enron_path << endl;
+    if ((enron_dir = opendir(get_enron_path())) == nullptr) {
+        cout << "Error(" << errno << ") opening enron folder through " << get_enron_path() << endl;
     }
 
     while ((enron_ent = readdir(enron_dir)) != nullptr) {
 
-        string user_path = enron_path;
+        string user_path = get_enron_path();
         user_path.append(enron_ent->d_name);
 
         if ((user_dir = opendir(user_path.c_str())) == nullptr) {
@@ -158,7 +165,7 @@ void enron::parse() {
                 file_path.append("/");
                 file_path.append(rep_ent->d_name);
 
-                add_words_from(file_path);
+                extract_data_from(file_path);
             }
             closedir(rep_dir);
         }

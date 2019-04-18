@@ -21,7 +21,7 @@ public:
 
 private:
     bool read_file_at(string & file_path);
-    void add_words_from(ifstream &input);
+    void extract_data_from(ifstream &input);
 
     void recursiveParse(string &path);
     //
