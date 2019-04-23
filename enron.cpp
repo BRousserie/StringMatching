@@ -7,9 +7,6 @@
 #include <cstring>
 
 
-#define BUFFER_SIZE 256
-
-
 string get_enron_path() {
     char buff[PATH_MAX];
     ssize_t len = ::readlink("/proc/self/exe", buff, sizeof(buff) - 1);
@@ -27,7 +24,7 @@ string get_enron_path() {
 
 enron::enron() {
     words = new map<string, int>;
-    mails = new vector<vector<int>>();
+    mails = new vector<set<int>>();
 }
 
 
@@ -92,14 +89,14 @@ bool enron::read_file_at(const string &file_path) {
 
 // Adds to enron::words the words that haven't been added yet, and associates them with a number
 void enron::extract_data_from(ifstream &input) {
-    vector<int> words_to_int;
+    set<int> words_to_int;
     string word;
 
     while (input >> word) {
         if ((*words).find(word) == (*words).end()) {
             (*words).emplace(word, (*words).size());
         }
-        words_to_int.push_back((*words)[word]);
+        words_to_int.emplace((*words)[word]);
     }
     mails->push_back(words_to_int);
 }
@@ -113,9 +110,9 @@ void enron::save() {
         words_stream << key << " " << value << "\n";
     }
 
-    for (const vector<int> &v : (*mails)) {
-        for (int i : v) {
-            mails_stream << i << " ";
+    for (const set<int> &set : (*mails)) {
+        for (int id : set) {
+            mails_stream << id << " ";
         }
         mails_stream << "\n";
     }
@@ -149,7 +146,7 @@ void enron::restore_map(ifstream &input_file) {
 
 void enron::restore_mails(ifstream &input_file) {
     string str_line;
-    vector<int> mail;
+    set<int> mail;
 
     while (getline(input_file, str_line)) {
         size_t pos = str_line.find(' ');
@@ -158,7 +155,7 @@ void enron::restore_mails(ifstream &input_file) {
 
         // Decompose statement
         while (pos != std::string::npos) {
-            mail.push_back(stoi(str_line.substr(initialPos, pos - initialPos)));
+            mail.emplace(stoi(str_line.substr(initialPos, pos - initialPos)));
             initialPos = pos + 1;
 
             pos = str_line.find(' ', initialPos);
@@ -169,7 +166,7 @@ void enron::restore_mails(ifstream &input_file) {
 }
 
 void enron::log() {
-    cout << mails->size() << "mails and " << words->size() << "words\n";
+    cout << "Treating " << mails->size() << " mails and " << words->size() << " words\n";
 }
 
 

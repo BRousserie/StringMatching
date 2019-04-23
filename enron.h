@@ -1,6 +1,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <set>
 
 using namespace std;
 
@@ -9,7 +10,7 @@ using namespace std;
 class enron {
 private:
     map<string, int>* words;
-    vector<vector<int>>* mails;
+    vector<set<int>>* mails;
     static enron* singleton;
 
 public:
