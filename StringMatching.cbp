@@ -31,6 +31,10 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
+		<Unit filename="App.cpp" />
+		<Unit filename="App.h" />
+		<Unit filename="Jaccard.cpp" />
+		<Unit filename="Jaccard.h" />
 		<Unit filename="enron.cpp" />
 		<Unit filename="enron.h" />
 		<Unit filename="main.cpp" />

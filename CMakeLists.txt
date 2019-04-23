@@ -4,4 +4,4 @@ project(internship)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
-add_executable(internship main.cpp enron.cpp enron.h Jaccard.cpp Jaccard.h)
+add_executable(internship main.cpp enron.cpp enron.h Jaccard.cpp Jaccard.h App.cpp App.h)

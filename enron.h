@@ -14,13 +14,15 @@ private:
     static enron* singleton;
 
 public:
-    enron();
     void save();
     void log();
 
+    map<string, int>* get_words();
+    vector<set<int>>* get_mails();
     static enron* get();
 
 private:
+    enron();
     bool setup_enron_data();
 
     void restore_map(ifstream & input_file);

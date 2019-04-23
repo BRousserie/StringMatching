@@ -1,4 +1,5 @@
 #include "enron.h"
+#include "App.h"
 #include <fstream>
 #include <iostream>
 #include <dirent.h>
@@ -7,35 +8,19 @@
 #include <cstring>
 
 
-string get_enron_path() {
-    char buff[PATH_MAX];
-    ssize_t len = ::readlink("/proc/self/exe", buff, sizeof(buff) - 1);
-    if (len != -1) {
-        buff[len] = '\0';
-        string path(buff);
-        string undesired_part("/StringMatching/bin/Debug/StringMatching");
-        path = path.substr(0, path.size() - undesired_part.size());
-        return path.append("/maildir");
-    } else {
-        cout << "Error with program path";
-    }
-}
-
-
 enron::enron() {
     words = new map<string, int>;
-    mails = new vector<set<int>>();
+    mails = new vector<set<int>>;
+
+    setup_enron_data();
 }
 
 
-enron *enron::singleton;
+enron* enron::singleton;
 
 // Enron is a singleton class. Its entity is accessed by this static function.
 enron *enron::get() {
-    if (!enron::singleton) {
-        enron::singleton = new enron();
-        enron::singleton->setup_enron_data();
-    }
+    if (!enron::singleton) enron::singleton = new enron();
     return enron::singleton;
 }
 
@@ -168,6 +153,17 @@ void enron::restore_mails(ifstream &input_file) {
 void enron::log() {
     cout << "Treating " << mails->size() << " mails and " << words->size() << " words\n";
 }
+
+map<string, int> *enron::get_words() {
+    return words;
+}
+
+vector<set<int>>* enron::get_mails() {
+    return mails;
+}
+
+
+
 
 
 /*
