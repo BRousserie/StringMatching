@@ -14,16 +14,21 @@ private:
 
 public:
     enron();
+    void save();
     void log();
-
 
     static enron* get();
 
 private:
-    bool read_file_at(string & file_path);
+    bool setup_enron_data();
+
+    void restore_map(ifstream & input_file);
+    void restore_mails(ifstream & input_file);
+
+    bool read_file_at(const string & file_path);
     void extract_data_from(ifstream &input);
 
-    void recursiveParse(string &path);
+    void recursiveParse(const string &path);
     //
     // void parse();
 };

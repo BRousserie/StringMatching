@@ -7,9 +7,12 @@
 #include <cstring>
 
 
+#define BUFFER_SIZE 256
+
+
 string get_enron_path() {
     char buff[PATH_MAX];
-    ssize_t len = ::readlink("/proc/self/exe", buff, sizeof(buff)-1);
+    ssize_t len = ::readlink("/proc/self/exe", buff, sizeof(buff) - 1);
     if (len != -1) {
         buff[len] = '\0';
         string path(buff);
@@ -34,15 +37,14 @@ enron *enron::singleton;
 enron *enron::get() {
     if (!enron::singleton) {
         enron::singleton = new enron();
-        string path(get_enron_path());
-        enron::singleton->recursiveParse(path);
+        enron::singleton->setup_enron_data();
     }
     return enron::singleton;
 }
 
 
 // Associates each word in enron inboxes with a different number and returns them as a map
-void enron::recursiveParse(string &path) {
+void enron::recursiveParse(const string &path) {
     DIR *dir;
     struct dirent *dirent;
 
@@ -74,8 +76,7 @@ void enron::recursiveParse(string &path) {
 }
 
 // Opens the file and calls the necessary methods to build
-bool enron::read_file_at(string & file_path) {
-    cout << file_path << "\n";
+bool enron::read_file_at(const string &file_path) {
     ifstream input(file_path);
 
     if (input.is_open()) {
@@ -104,17 +105,15 @@ void enron::extract_data_from(ifstream &input) {
 }
 
 // Outputs data in files on disk
-void enron::log() {
+void enron::save() {
     ofstream words_stream(get_enron_path().append("/map.txt"), ofstream::out);
     ofstream mails_stream(get_enron_path().append("/mails.txt"), ofstream::out);
 
-    for(auto[key, value]: (*words)) {
+    for (auto[key, value]: (*words)) {
         words_stream << key << " " << value << "\n";
     }
 
-    for (vector<int> v : (*mails)) {
-        static int id = 1;
-        mails_stream << id++ << " : ";
+    for (const vector<int> &v : (*mails)) {
         for (int i : v) {
             mails_stream << i << " ";
         }
@@ -122,6 +121,56 @@ void enron::log() {
     }
 }
 
+bool enron::setup_enron_data() {
+    ifstream map(get_enron_path().append("/map.txt"), ifstream::in);
+    ifstream mails(get_enron_path().append("/mails.txt"), ifstream::in);
+
+    if (map.is_open() && mails.is_open()) {
+        restore_map(map);
+        restore_mails(mails);
+
+        map.close();
+        mails.close();
+    } else {
+        cout << "Data not found at " << get_enron_path() << ", now parsing enron database...\n";
+        recursiveParse(get_enron_path());
+        save();
+    }
+}
+
+void enron::restore_map(ifstream &input_file) {
+    int id;
+    string word;
+
+    while (input_file >> word >> id) {
+        (*words).emplace(word, id);
+    }
+}
+
+void enron::restore_mails(ifstream &input_file) {
+    string str_line;
+    vector<int> mail;
+
+    while (getline(input_file, str_line)) {
+        size_t pos = str_line.find(' ');
+        size_t initialPos = 0;
+        mail.clear();
+
+        // Decompose statement
+        while (pos != std::string::npos) {
+            mail.push_back(stoi(str_line.substr(initialPos, pos - initialPos)));
+            initialPos = pos + 1;
+
+            pos = str_line.find(' ', initialPos);
+        }
+
+        mails->push_back(mail);
+    }
+}
+
+void enron::log() {
+    cout << mails->size() << "mails and " << words->size() << "words\n";
+}
 
 
 /*
