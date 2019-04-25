@@ -1,5 +1,6 @@
 #include <fstream>
 #include <iostream>
+#include <omp.h>
 #include "Jaccard.h"
 #include "enron.h"
 #include "App.h"
@@ -23,6 +24,7 @@ void Jaccard::match() {
 
     ofstream output_file(get_enron_path().append("/Jaccard_Measures.txt"));
 
+#pragma omp parallel for num_threads(8)
     for (i = 0; i < NB_MAILS; i++) {
         for (j = i + 1; j < NB_MAILS; j++) {
 
