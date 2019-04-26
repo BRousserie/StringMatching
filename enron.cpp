@@ -55,6 +55,7 @@ void enron::recursiveParse(const string &path) {
         }
     }
     closedir(dir);
+    delete(dictionary);
 }
 
 // Opens the file and calls the necessary methods to build
