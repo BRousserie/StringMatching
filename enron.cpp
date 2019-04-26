@@ -1,5 +1,4 @@
 #include "enron.h"
-#include "App.h"
 #include <fstream>
 #include <iostream>
 #include <dirent.h>
@@ -9,8 +8,8 @@
 
 
 enron::enron() {
-    words = new map<string, int>;
-    mails = new vector<set<int>>;
+    //words = new map<string, int>;
+    mails = new array<set<int>, NB_MAILS>;
 
     setup_enron_data();
 }
@@ -27,6 +26,7 @@ enron *enron::get() {
 
 // Associates each word in enron inboxes with a different number and returns them as a map
 void enron::recursiveParse(const string &path) {
+    static map<string, int>* dictionary = new map<string, int>;
     DIR *dir;
     struct dirent *dirent;
 
@@ -35,7 +35,7 @@ void enron::recursiveParse(const string &path) {
     // 1 - Use path as a folder
     if ((dir = opendir(path.c_str())) == nullptr) {
         // 2 - If it doesn't work, use it as a file
-        if (!read_file_at(path)) {
+        if (!read_file_at(path, dictionary)) {
             // 3 - If it doesn't work, there's an error
             cout << "Error(" << errno << ") opening " << path << endl;
         }
@@ -58,11 +58,11 @@ void enron::recursiveParse(const string &path) {
 }
 
 // Opens the file and calls the necessary methods to build
-bool enron::read_file_at(const string &file_path) {
+bool enron::read_file_at(const string &file_path, map<string, int>* dictionary) {
     ifstream input(file_path);
 
     if (input.is_open()) {
-        extract_data_from(input);
+        extract_data_from(input, dictionary);
 
         input.close();
         return true;
@@ -73,27 +73,28 @@ bool enron::read_file_at(const string &file_path) {
 }
 
 // Adds to enron::words the words that haven't been added yet, and associates them with a number
-void enron::extract_data_from(ifstream &input) {
+void enron::extract_data_from(ifstream &input, map<string, int>* dictionary) {
+    static int i = 0;
     set<int> words_to_int;
     string word;
 
     while (input >> word) {
-        if ((*words).find(word) == (*words).end()) {
-            (*words).emplace(word, (*words).size());
+        if ((*dictionary).find(word) == (*dictionary).end()) {
+            (*dictionary).emplace(word, (*dictionary).size());
         }
-        words_to_int.emplace((*words)[word]);
+        words_to_int.emplace((*dictionary)[word]);
     }
-    mails->push_back(words_to_int);
+    mails->at(i++) = words_to_int;
 }
 
 // Outputs data in files on disk
 void enron::save() {
-    ofstream words_stream(get_enron_path().append("/map.txt"), ofstream::out);
+    // ofstream words_stream(get_enron_path().append("/map.txt"), ofstream::out);
     ofstream mails_stream(get_enron_path().append("/mails.txt"), ofstream::out);
 
-    for (auto[key, value]: (*words)) {
+    /* for (auto[key, value]: (*words)) {
         words_stream << key << " " << value << "\n";
-    }
+    } */
 
     for (const set<int> &set : (*mails)) {
         for (int id : set) {
@@ -104,15 +105,15 @@ void enron::save() {
 }
 
 bool enron::setup_enron_data() {
-    ifstream map(get_enron_path().append("/map.txt"), ifstream::in);
-    ifstream mails(get_enron_path().append("/mails.txt"), ifstream::in);
+    // ifstream map_file(get_enron_path().append("/map.txt"), ifstream::in);
+    ifstream mails_file(get_enron_path().append("/mails.txt"), ifstream::in);
 
-    if (map.is_open() && mails.is_open()) {
-        restore_map(map);
-        restore_mails(mails);
+    if (/*map_file.is_open() &&*/ mails_file.is_open()) {
+        //restore_map(map_file);
+        restore_mails(mails_file);
 
-        map.close();
-        mails.close();
+        //map_file.close();
+        mails_file.close();
     } else {
         cout << "Data not found at " << get_enron_path() << ", now parsing enron database...\n";
         recursiveParse(get_enron_path());
@@ -120,18 +121,20 @@ bool enron::setup_enron_data() {
     }
 }
 
-void enron::restore_map(ifstream &input_file) {
+/*void enron::restore_map(ifstream &input_file) {
     int id;
     string word;
 
     while (input_file >> word >> id) {
         (*words).emplace(word, id);
     }
-}
+}*/
 
 void enron::restore_mails(ifstream &input_file) {
     string str_line;
     set<int> mail;
+
+    static int i = 0;
 
     while (getline(input_file, str_line)) {
         size_t pos = str_line.find(' ');
@@ -146,19 +149,19 @@ void enron::restore_mails(ifstream &input_file) {
             pos = str_line.find(' ', initialPos);
         }
 
-        mails->push_back(mail);
+        mails->at(i++) = mail;
     }
 }
 
 void enron::log() {
-    cout << "Treating " << mails->size() << " mails and " << words->size() << " words\n";
+    cout << "Treating " << mails->size() << " mails\n"; // and " << words->size() << " words\n";
 }
 
-map<string, int> *enron::get_words() {
+/*map<string, int> *enron::get_words() {
     return words;
-}
+}*/
 
-vector<set<int>>* enron::get_mails() {
+array<set<int>, NB_MAILS>* enron::get_mails() {
     return mails;
 }
 

@@ -7,8 +7,6 @@ using namespace std;
 #ifndef INTERNSHIP_JACCARD_H
 #define INTERNSHIP_JACCARD_H
 
-#define NB_MAILS 517401
-
 class Jaccard {
 private:
     static Jaccard* singleton;
