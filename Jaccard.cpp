@@ -21,6 +21,7 @@ void Jaccard::match() {
     enron entity = (*enron::get());
     int interval;
     int i, j;
+    set<int> union_set;
 
     ofstream output_file(get_enron_path().append("/Jaccard_Measures.txt"));
 
@@ -40,8 +41,11 @@ void Jaccard::match() {
 
                 }
             }
+
+            union_set = setA;
+            union_set.insert(setB.begin(), setB.end());
             output_file << "#" << i + 1 << " - #" << j + 1 << " "
-                        << (float) interval / (float) (setA.size() + setB.size()) << "\n";
+                        << (float) interval / (float) union_set.size() << "\n";
 
         }
     }
