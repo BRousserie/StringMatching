@@ -15,5 +15,6 @@ string get_enron_path() {
         return path.append("/maildir");
     } else {
         cout << "Error with program path";
+        return nullptr;
     }
 }

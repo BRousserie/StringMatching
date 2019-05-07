@@ -18,14 +18,13 @@ Jaccard *Jaccard::get() {
 }
 
 void Jaccard::match() {
-    enron entity = (*enron::get());
-    int interval;
-    int i, j;
+    enron& entity = (*enron::get());
+    int i, j, interval;
     set<int> union_set;
-
+    string output;
     ofstream output_file(get_enron_path().append("/Jaccard_Measures.txt"));
 
-#pragma omp parallel for num_threads(8)
+#pragma omp parallel for private(i, j, interval, output, union_set) shared(output_file, entity)
     for (i = 0; i < NB_MAILS; i++) {
         for (j = i + 1; j < NB_MAILS; j++) {
 
@@ -44,8 +43,9 @@ void Jaccard::match() {
 
             union_set = setA;
             union_set.insert(setB.begin(), setB.end());
-            output_file << "#" << i + 1 << " - #" << j + 1 << " "
-                        << (float) interval / (float) union_set.size() << "\n";
+            output = ("#" + to_string(i + 1) + " - #" + to_string(j + 1) + " "
+                        + to_string((float) interval / (float) union_set.size()) + "\n");
+            output_file << output;
 
         }
     }
