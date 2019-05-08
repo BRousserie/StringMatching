@@ -99,7 +99,7 @@ void enron::save() {
     }
 }
 
-bool enron::setup_enron_data() {
+void enron::setup_enron_data() {
     ifstream mails_file(get_enron_path().append("/mails.txt"), ifstream::in);
 
     if (mails_file.is_open()) {

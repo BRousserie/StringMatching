@@ -18,3 +18,18 @@ string get_enron_path() {
         return nullptr;
     }
 }
+
+void update_min(pair<int, float>& min, const array<measure, NB_SCORES>& scores) {
+    for(int i = 0; i < scores.size(); i++) {
+        if (scores[i].score < min.second) {
+            min.second = scores[i].score;
+            min.first = i;
+        }
+    }
+}
+
+void measure::set(int id_A, int id_B, float score) {
+    mail_id_A = id_A;
+    mail_id_B = id_B;
+    this->score = score;
+}

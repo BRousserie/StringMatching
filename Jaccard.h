@@ -1,11 +1,9 @@
-#include <vector>
-#include <map>
+#ifndef INTERNSHIP_JACCARD_H
+#define INTERNSHIP_JACCARD_H
+
 #include "enron.h"
 
 using namespace std;
-
-#ifndef INTERNSHIP_JACCARD_H
-#define INTERNSHIP_JACCARD_H
 
 class Jaccard {
 private:
@@ -13,10 +11,12 @@ private:
 
 public:
     static Jaccard* get();
+    void log(array<measure, NB_SCORES>& scores);
 
 private:
     Jaccard();
     void match();
+
 };
 
 

@@ -1,3 +1,6 @@
+#ifndef INTERNSHIP_ENRON_H
+#define INTERNSHIP_ENRON_H
+
 #include <map>
 #include <string>
 #include <array>
@@ -6,8 +9,6 @@
 
 using namespace std;
 
-#ifndef INTERNSHIP_ENRON_H
-#define INTERNSHIP_ENRON_H
 class enron {
 private:
     array<set<int>, NB_MAILS>* mails;
@@ -22,7 +23,7 @@ public:
 
 private:
     enron();
-    bool setup_enron_data();
+    void setup_enron_data();
     void restore_mails(ifstream & input_file);
 
     void recursiveParse(const string &path);
