@@ -25,7 +25,6 @@ enron *enron::get() {
 
 // Associates each word in enron inboxes with a different number and returns them as a map
 void enron::recursiveParse(const string &path) {
-    static map<string, int>* dictionary = new map<string, int>;
     DIR *dir;
     struct dirent *dirent;
 
@@ -54,7 +53,6 @@ void enron::recursiveParse(const string &path) {
         }
     }
     closedir(dir);
-    delete(dictionary);
 }
 
 // Opens the file and calls the necessary methods to build
@@ -108,7 +106,9 @@ void enron::setup_enron_data() {
         mails_file.close();
     } else {
         cout << "Data not found at " << get_enron_path() << ", now parsing enron database...\n";
+        dictionary = new map<string, int>;
         recursiveParse(get_enron_path());
+        delete dictionary;
         save();
     }
 }

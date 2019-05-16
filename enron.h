@@ -12,6 +12,7 @@ using namespace std;
 class enron {
 private:
     array<set<int>, NB_MAILS>* mails;
+    map<string, int>* dictionary;
     static enron* singleton;
 
 public:
