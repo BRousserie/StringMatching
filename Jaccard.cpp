@@ -41,11 +41,8 @@ void Jaccard::match() {
                 interval = 0;
 
                 for (int A : setA) {
-                    for (int B : setB) {
-
-                        if (A == B) interval++;
-
-                    }
+                    if (setB.find(A) != setB.end())
+                        interval++;
                 }
 
                 union_set = setA;
