@@ -20,17 +20,16 @@ Jaccard *Jaccard::get() {
 
 void Jaccard::match() {
     enron& entity = (*enron::get());
-    int i, j, interval, inserted_values = 0;
     set<int> union_set;
-    float score;
     pair<int, float> min(0, 0);
     array<measure, NB_SCORES> scores{};
-    float percentage;
+    int i, j, intersection, inserted_values = 0;
+    float score, completion;
     int nb_measures_done = 1;
 
-    cout << fixed << setprecision(4);
+    cout << fixed << setprecision(2);
 
-#pragma omp parallel for private(i, j, interval, union_set, score) shared(entity, min, scores, nb_measures_done, percentage) reduction(+: inserted_values) num_threads(NB_THREADS)
+#pragma omp parallel for private(i, j, intersection, union_set, score) shared(entity, min, scores, nb_measures_done, completion) reduction(+: inserted_values) num_threads(NB_THREADS)
     for (i = 0; i < NB_MAILS; i++) {
         for (j = i + 1; j < NB_MAILS; j++) {
 
@@ -38,34 +37,32 @@ void Jaccard::match() {
             const set<int> &setB = (*entity.get_mails())[j];
 
             if (setA.size() / THRESHOLD > setB.size() && setB.size() > setA.size() * THRESHOLD ) {
-                interval = 0;
 
-                for (int A : setA) {
-                    if (setB.find(A) != setB.end())
-                        interval++;
-                }
+                intersection = intersection_of(setA, setB);
 
-                union_set = setA;
-                union_set.insert(setB.begin(), setB.end());
+                if (intersection > 0) {
+                    union_set = setA;
+                    union_set.insert(setB.begin(), setB.end());
 
-                score = (float) interval / (float) union_set.size();
+                    score = (float) intersection / union_set.size();
 
-                if (inserted_values < NB_SCORES) {
-                    scores[inserted_values++].set(i, j, score);
-                } else {
-                    if (score > min.second) {
+                    if (inserted_values < NB_SCORES) {
+                        scores[inserted_values++].set(i, j, score);
+                    } else {
+                        if (score > min.second) {
 #pragma omp critical
-{
-                        scores[min.first].set(i, j, score);
-                        update_min(min, scores);
-}
+                            {
+                                scores[min.first].set(i, j, score);
+                                update_min(min, scores);
+                            }
+                        }
                     }
                 }
             }
 
             if (omp_get_thread_num() == 0) {
-                percentage = 100 *  ((float)nb_measures_done++ / NB_MEASURES_PER_THREAD);
-                cout << percentage << "% completed : " << nb_measures_done << " measures done (1st thread)\n" ;
+                completion = 100 *  ((float)nb_measures_done++ / NB_MEASURES_PER_THREAD);
+                cout << completion << "% completed : " << nb_measures_done << " measures done (1st thread)\n" ;
             }
         }
     }

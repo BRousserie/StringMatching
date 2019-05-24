@@ -20,7 +20,9 @@ string get_enron_path() {
 }
 
 void update_min(pair<int, float>& min, const array<measure, NB_SCORES>& scores) {
-    for(int i = 0; i < scores.size(); i++) {
+    min.second = scores[0].score;
+    min.first = 0;
+    for(int i = 1; i < scores.size(); i++) {
         if (scores[i].score < min.second) {
             min.second = scores[i].score;
             min.first = i;
@@ -28,8 +30,23 @@ void update_min(pair<int, float>& min, const array<measure, NB_SCORES>& scores) 
     }
 }
 
-void measure::set(int id_A, int id_B, float score) {
+int intersection_of(const set<int> &setA, const set<int> &setB) {
+    int intersection = 0;
+    int nb_words_remaining = setA.size();
+
+    for (int A : setA) {
+        if (setB.find(A) != setB.end())
+            intersection++;
+
+        if ((float)( intersection + (--nb_words_remaining)) / setA.size() < THRESHOLD) {
+            return -1;
+        }
+    }
+    return intersection;
+}
+
+void measure::set(int id_A, int id_B, float new_score) {
     mail_id_A = id_A;
     mail_id_B = id_B;
-    this->score = score;
+    score = new_score;
 }
